@@ -1,4 +1,4 @@
-name: Build APK 2.3.0
+name: Build APK 2.5.0
 
 on:
   workflow_dispatch:
@@ -7,9 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone 2.3.0 with LFS
+      - name: Clone 2.5.0 with LFS
         run: |
-          git clone --depth 1 --branch v2.3.0 https://github.com/umr-xiaomai/kgka_Music_hl.git src
+          git clone --depth 1 --branch v2.5.0 https://github.com/umr-xiaomai/kgka_Music_hl.git src
           cd src
           git lfs install
           git lfs pull
@@ -31,7 +31,7 @@ jobs:
         working-directory: src
         run: |
           grep -n abiFilters android/app/build.gradle.kts
-          sed -i 's|abiFilters.add("arm64-v8a")|abiFilters.add("arm64-v8a"); abiFilters.add("armeabi-v7a")|g' android/app/build.gradle.kts
+          sed -i 's|abiFilters.add("arm64-v8a")|abiFilters.add("x86_64"); abiFilters.add("armeabi-v7a")|g' android/app/build.gradle.kts
           grep -n abiFilters android/app/build.gradle.kts
 
       - name: Pub get
@@ -45,5 +45,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ka-music-2.3.0
+          name: ka-music-2.5.0
           path: src/build/app/outputs/flutter-apk/*.apk
