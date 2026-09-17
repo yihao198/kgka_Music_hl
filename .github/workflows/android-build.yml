@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: v2.6.0
           lfs: true
       - uses: actions/setup-java@v4
         with:
