@@ -1,0 +1,32 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+      - name: Add v7a abiFilter
+        run: |
+          sed -i 's|abiFilters.add("arm64-v8a")|abiFilters.add("arm64-v8a"); abiFilters.add("armeabi-v7a")|g' android/app/build.gradle.kts
+          grep -n abiFilters android/app/build.gradle.kts
+      - run: flutter pub get
+      - run: flutter build apk --release --target-platform android-arm,android-arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ka-music-apk
+          path: build/app/outputs/flutter-apk/*.apk
