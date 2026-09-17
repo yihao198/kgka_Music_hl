@@ -1,33 +1,47 @@
-name: Build Android APK
+name: Build APK 2.6.0
 
 on:
-  push:
-    branches: [master]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: v2.6.0
-          lfs: true
-      - uses: actions/setup-java@v4
+      - name: Download 2.6.0 source
+        run: |
+          curl -fL -o src.tar.gz https://github.com/umr-xiaomai/kgka_Music_hl/archive/refs/tags/v2.6.0.tar.gz
+          tar xzf src.tar.gz
+          ls -d */
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-      - uses: subosito/flutter-action@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
           cache: true
-      - name: Add v7a abiFilter
+
+      - name: Patch abiFilters
+        working-directory: kgka_Music_hl-2.6.0
         run: |
+          grep -n abiFilters android/app/build.gradle.kts
           sed -i 's|abiFilters.add("arm64-v8a")|abiFilters.add("arm64-v8a"); abiFilters.add("armeabi-v7a")|g' android/app/build.gradle.kts
           grep -n abiFilters android/app/build.gradle.kts
-      - run: flutter pub get
-      - run: flutter build apk --release --target-platform android-arm,android-arm64
-      - uses: actions/upload-artifact@v4
+
+      - name: Pub get
+        working-directory: kgka_Music_hl-2.6.0
+        run: flutter pub get
+
+      - name: Build
+        working-directory: kgka_Music_hl-2.6.0
+        run: flutter build apk --release --target-platform android-arm,android-arm64
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
-          name: ka-music-apk
-          path: build/app/outputs/flutter-apk/*.apk
+          name: ka-music-2.6.0
+          path: kgka_Music_hl-2.6.0/build/app/outputs/flutter-apk/*.apk
