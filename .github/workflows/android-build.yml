@@ -1,4 +1,4 @@
-name: Build APK 2.5.0
+name: Build APK 2.5.0 (Fat APK - All ABIs)
 
 on:
   workflow_dispatch:
@@ -27,23 +27,34 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Patch abiFilters
+      - name: Patch abiFilters (keep 3 ABIs)
         working-directory: src
         run: |
-          grep -n abiFilters android/app/build.gradle.kts
-          sed -i 's|abiFilters.add("arm64-v8a")|abiFilters.add("x86_64"); abiFilters.add("armeabi-v7a")|g' android/app/build.gradle.kts
-          grep -n abiFilters android/app/build.gradle.kts
+          echo "=== Before ==="
+          grep -n abiFilters android/app/build.gradle.kts || true
+          # 把原来的 arm64-v8a 那一行替换成三个 ABI
+          sed -i 's|abiFilters.add("arm64-v8a")|abiFilters.add("arm64-v8a")\n            abiFilters.add("armeabi-v7a")\n            abiFilters.add("x86_64")|g' android/app/build.gradle.kts
+          echo "=== After ==="
+          grep -n abiFilters android/app/build.gradle.kts || true
 
       - name: Pub get
         working-directory: src
         run: flutter pub get
 
-      - name: Build
+      - name: Build Fat APK (3 ABIs)
         working-directory: src
-        run: flutter build apk --release --target-platform android-arm,android-arm64
+        run: flutter build apk --release --target-platform android-arm,android-arm64,android-x64
+
+      - name: Verify ABIs in APK
+        working-directory: src
+        run: |
+          APK=$(ls build/app/outputs/flutter-apk/app-release.apk)
+          echo "APK: $APK"
+          echo "=== lib/* in APK ==="
+          unzip -l "$APK" | grep -E "lib/(arm64-v8a|armeabi-v7a|x86_64)/" || true
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ka-music-2.5.0
+          name: ka-music-2.5.0-fat
           path: src/build/app/outputs/flutter-apk/*.apk
