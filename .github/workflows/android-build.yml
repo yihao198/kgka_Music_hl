@@ -1,4 +1,4 @@
-name: Build APK 2.5.0 (Fat APK - All ABIs)
+name: Build APK 2.4.0 (Fat APK - All ABIs)
 
 on:
   workflow_dispatch:
@@ -7,9 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone 2.5.0 with LFS
+      - name: Clone 2.4.0 with LFS
         run: |
-          git clone --depth 1 --branch v2.5.0 https://github.com/umr-xiaomai/kgka_Music_hl.git src
+          git clone --depth 1 --branch v2.4.0 https://github.com/umr-xiaomai/kgka_Music_hl.git src
           cd src
           git lfs install
           git lfs pull
@@ -56,5 +56,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: ka-music-2.5.0-fat
+          name: ka-music-2.4.0-fat
           path: src/build/app/outputs/flutter-apk/*.apk
